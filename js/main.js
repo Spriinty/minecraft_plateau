@@ -35,8 +35,9 @@ function reprendrePartie() {
 }
 
 function init() {
-  // Expose l'état (pratique pour le débogage / les tests)
+  // Expose l'état + le rendu (pratique pour le débogage / les tests)
   window.__state = state;
+  window.__rendreJeu = () => R.rendreJeu();
 
   // Écran d'accueil
   allerAccueil();

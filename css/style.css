@@ -172,7 +172,7 @@ html, body {
 /* --- Décor animé sur les bords (eau / lave / void), fait 100% en CSS --- */
 #zone-plateau::before, #zone-plateau::after {
   content: ""; position: absolute; top: 0; bottom: 0; width: 46px; z-index: 0;
-  pointer-events: none; opacity: .6; background-size: 100% 46px;
+  pointer-events: none; opacity: .4; background-size: 100% 46px;
   animation: chute 1.3s linear infinite;
 }
 #zone-plateau::before { left: 0; }
@@ -188,7 +188,7 @@ html, body {
 #zone-plateau.deco-nether::before, #zone-plateau.deco-nether::after {
   background-image: repeating-linear-gradient(180deg,
     #ffcf3d 0 7px, #ff6a1f 7px 16px, #d43208 16px 30px, #7a1500 30px 46px);
-  opacity: .75;
+  opacity: .5;
 }
 /* End = void violet scintillant */
 #zone-plateau.deco-end::before, #zone-plateau.deco-end::after {
@@ -196,7 +196,7 @@ html, body {
     radial-gradient(circle at 50% 20%, #d0a3ff 1.5px, transparent 2px),
     radial-gradient(circle at 30% 60%, #b388ff 1.5px, transparent 2px),
     repeating-linear-gradient(180deg, #2a2340 0 20px, #150f2a 20px 46px);
-  opacity: .7;
+  opacity: .5;
 }
 
 /* --- Animation "miam" : l'animal au centre, les morceaux tournent autour --- */

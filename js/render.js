@@ -43,8 +43,8 @@ function libelleContenu(c) {
       if (c.texture) return s.sprite ? { textureSprite: c.texture, badge } : { texture: c.texture, badge };
       return { src: null, label: s.emoji, badge };
     }
-    case "portail_nether": return { src: null, badge: "🔥 Nether", label: "🌋" };
-    case "portail_end": return { src: null, badge: "End", label: "🌀" };
+    case "portail_nether": return { texture: "texture/overworld/portail_nether.png", badge: "Nether" };
+    case "portail_end": return { texture: "texture/overworld/portail_end.png", badge: "End" };
     case "arrivee": return { textureSprite: "texture/overworld/fin.png", badge: "🏆" };
     case "retour": return { src: null, label: "🏠" };
     case "depart": return { texture: "texture/overworld/start.png" };
@@ -62,9 +62,23 @@ function construirePlateau(plateau) {
   const cfg = plateau.cfg;
   plateauEl.className = `theme-${cfg.theme}`;
   plateauEl.style.gridTemplateColumns = `repeat(${cfg.cols}, var(--case))`;
-  // décor animé (eau / lave / void) autour du plateau
+  // décor animé (eau / lave / void) + image de fond selon le monde
   const zone = document.querySelector("#zone-plateau");
-  if (zone) zone.className = `deco-${cfg.theme}`;
+  if (zone) {
+    zone.className = `deco-${cfg.theme}`;
+    const fonds = {
+      overworld: "texture/overworld/background_overworld.png",
+      nether: "texture/nether/background_nether.png",
+      end: "texture/ender/background_end.png",
+    };
+    const fond = fonds[cfg.theme];
+    // voile sombre par-dessus l'image pour ne pas être trop vif et garder le plateau lisible
+    zone.style.backgroundImage =
+      `linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)), url("${img(fond)}")`;
+    zone.style.backgroundSize = "cover";
+    zone.style.backgroundPosition = "center";
+    zone.style.backgroundRepeat = "no-repeat";
+  }
 
   for (const c of plateau.cases) {
     const { ligne, col } = positionSerpentin(c.index, cfg.cols);
