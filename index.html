@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#3b2a1a" />
+  <title>Le Jeu de Plateau Minecraft</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <!-- Bandeau demandant de tourner la tablette en paysage -->
+  <div id="rotate-hint">
+    <div class="rotate-box">
+      <div class="rotate-icon">📱↻</div>
+      <p>Tourne l'écran en <strong>paysage</strong> pour jouer&nbsp;!</p>
+    </div>
+  </div>
+
+  <!-- ÉCRAN D'ACCUEIL : choix des joueurs et des pions -->
+  <section id="ecran-accueil" class="ecran">
+    <div class="accueil-inner">
+      <h1 class="titre">Le&nbsp;Jeu&nbsp;de&nbsp;Plateau <span>Minecraft</span></h1>
+      <p class="sous-titre">Un jeu de l'oie inventé maison — arrive au bout en survivant aux ennemis&nbsp;!</p>
+
+      <div id="config-joueurs"></div>
+
+      <div class="accueil-boutons">
+        <button id="btn-reprendre" class="btn btn-secondaire" hidden>Reprendre la partie</button>
+        <button id="btn-jouer" class="btn btn-principal">Commencer l'aventure ⛏️</button>
+      </div>
+      <p class="hint-choix">Chaque joueur choisit son pion en cliquant dessus.</p>
+    </div>
+  </section>
+
+  <!-- ÉCRAN DE JEU -->
+  <section id="ecran-jeu" class="ecran" hidden>
+    <header id="hud">
+      <div id="hud-joueurs"></div>
+      <div id="hud-centre">
+        <div id="monde-label">Overworld</div>
+        <div id="tour-label">Tour 1</div>
+      </div>
+      <div id="hud-actions">
+        <button id="btn-menu" class="btn btn-mini">☰</button>
+      </div>
+    </header>
+
+    <main id="zone-plateau">
+      <div id="plateau"></div>
+    </main>
+
+    <footer id="barre-action">
+      <div id="joueur-actif"></div>
+      <button id="btn-de" class="btn btn-de">🎲 Lancer le dé</button>
+      <div id="de-resultat"></div>
+    </footer>
+  </section>
+
+  <!-- MODALE générique (événements, combats, coffres...) -->
+  <div id="modale" class="modale-overlay" hidden>
+    <div class="modale-boite">
+      <div id="modale-contenu"></div>
+    </div>
+  </div>
+
+  <!-- Petit menu (recommencer, quitter) -->
+  <div id="menu-pause" class="modale-overlay" hidden>
+    <div class="modale-boite">
+      <h2>Menu</h2>
+      <button id="btn-reprise" class="btn btn-principal">Reprendre</button>
+      <button id="btn-nouvelle" class="btn btn-secondaire">Nouvelle partie</button>
+    </div>
+  </div>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
