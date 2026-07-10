@@ -115,6 +115,7 @@ async function resoudreCase(joueur) {
       if (!c.ennemi.vaincu) await combattre(joueur, c.ennemi, null, c);
       break;
     case "coffre":
+      // Réutilisable : chaque joueur qui s'arrête dessus reçoit du butin (équité)
       await ouvrirCoffre(joueur, c);
       break;
     case "nourriture":
@@ -218,29 +219,33 @@ async function respawn(joueur) {
 async function ouvrirCoffre(joueur, c) {
   const coffre = COFFRES[c.coffre];
   const objetId = tirageParPoids(BUTIN[coffre.rarete]);
-  c.type = "vide"; c.coffre = null; // le coffre est vidé
-  R.rafraichirCase(joueur.position);
+  // le coffre reste sur le plateau et pourra être rouvert par les autres joueurs
 
-  let nom, image;
+  let nom, image, suffixe = "";
   if (objetId === "emeraude") {
     const [min, max] = RULES.emeraudesParCoffre || [1, 1];
     const qty = alea(min, max);
     ajouterObjet(joueur, "emeraude", qty);
     nom = `${qty} émeraude${qty > 1 ? "s" : ""} 💚`; image = EMERAUDE.img;
-  } else {
+  } else if (objetId === "bouclier") {
     ajouterObjet(joueur, objetId);
-    if (objetId === "bouclier") { nom = "un Bouclier 🛡️"; image = "stuff/bouclier/stuff_bouclier.png"; }
-    else if (objetId === "coeur") { nom = "2 cœurs ❤️"; image = "helper/helper_vache.png"; }
-    else {
-      const a = ARMES.find((x) => x.id === objetId) || ARMURES.find((x) => x.id === objetId);
-      nom = a.nom; image = a.img;
-    }
+    nom = "un Bouclier 🛡️"; image = "stuff/bouclier/stuff_bouclier.png";
+  } else if (objetId === "coeur") {
+    ajouterObjet(joueur, objetId);
+    nom = "2 cœurs ❤️"; image = "helper/helper_vache.png";
+  } else {
+    // arme ou armure : on ne garde que la plus forte
+    const a = ARMES.find((x) => x.id === objetId) || ARMURES.find((x) => x.id === objetId);
+    ajouterObjet(joueur, objetId);
+    const gardé = joueur.armes.includes(objetId) || joueur.armures.includes(objetId);
+    nom = a.nom; image = a.img;
+    if (!gardé) suffixe = "<br><span style='font-size:13px;opacity:.85'>…mais ton équipement actuel est meilleur, tu le laisses.</span>";
   }
   R.rendreHud();
 
   await demander({
     titre: `${coffre.nom} ouvert&nbsp;!`, img: image,
-    html: `<p class="gain">Tu trouves ${nom}&nbsp;!</p>`,
+    html: `<p class="gain">Tu trouves ${nom}&nbsp;!${suffixe}</p>`,
     boutons: [{ texte: "Super&nbsp;!", valeur: "ok" }],
   });
 }
@@ -255,10 +260,12 @@ async function ramasserNourriture(joueur, c) {
   R.rafraichirCase(joueur.position);
   R.rendreHud();
 
-  // Petite animation : des morceaux de nourriture qui tournoient autour de l'animal
+  // Petite animation : l'animal au centre, des morceaux qui tournent autour
+  const animal = `${ASSETS}/${n.img}`;
   const aliment = `${ASSETS}/${n.aliment}`;
   const anim = `
     <div class="miam-anim">
+      <img class="miam-centre" src="${animal}">
       <img class="miam-morceau m1" src="${aliment}">
       <img class="miam-morceau m2" src="${aliment}">
       <img class="miam-morceau m3" src="${aliment}">
@@ -268,7 +275,7 @@ async function ramasserNourriture(joueur, c) {
        ${n.soin} cœur${n.soin > 1 ? "s" : ""}.</p>`;
 
   await demander({
-    titre: "🍖 À table&nbsp;!", img: n.img, html: anim,
+    titre: "🍖 À table&nbsp;!", html: anim,
     boutons: [{ texte: "Continuer", valeur: "ok" }],
   });
 }

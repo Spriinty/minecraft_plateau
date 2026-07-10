@@ -94,9 +94,15 @@ export function ajouterObjet(joueur, objetId, qty = 1) {
   } else if (objetId === "coeur") {
     soigner(joueur, 2);
   } else if (ARMURES.find((a) => a.id === objetId)) {
-    if (!joueur.armures.includes(objetId)) joueur.armures.push(objetId);
+    // on ne garde que la meilleure armure (pas d'accumulation)
+    const nouv = ARMURES.find((a) => a.id === objetId);
+    const best = meilleureArmure(joueur);
+    if (!best || nouv.reduction > best.reduction) joueur.armures = [objetId];
   } else if (ARMES.find((a) => a.id === objetId)) {
-    if (!joueur.armes.includes(objetId)) joueur.armes.push(objetId);
+    // on ne garde que la meilleure arme (pas d'accumulation)
+    const nouv = ARMES.find((a) => a.id === objetId);
+    const best = meilleureArme(joueur);
+    if (!best || nouv.attaque > best.attaque) joueur.armes = [objetId];
   }
 }
 

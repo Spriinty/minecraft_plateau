@@ -106,16 +106,16 @@ export function genererPlateau(monde) {
     }
   }
 
-  // 4c) Première ligne "sûre" : que des COFFRES (stuff + émeraudes), pas de
-  //     nourriture (inutile tant qu'on n'a pas perdu de vie). Les deux joueurs
-  //     démarrent ainsi avec de l'équipement.
+  // 4c) Première ligne "sûre" : environ 1 case sur 2 = un COFFRE (stuff +
+  //     émeraudes), le reste vide. Aucun ennemi. Les coffres étant réutilisables,
+  //     ça évite que le premier joueur rafle tout.
   if (cfg.premiereLigneSure) {
     for (let i = 1; i < cfg.cols && i < n - 1; i++) {
       if (reserves.has(i)) continue;
-      cases[i].type = "coffre";
-      cases[i].coffre = coffreAuHasard();
       cases[i].ennemi = null;
       cases[i].nourriture = null;
+      if (chance(0.5)) { cases[i].type = "coffre"; cases[i].coffre = coffreAuHasard(); }
+      else { cases[i].type = "vide"; cases[i].coffre = null; }
     }
   }
 

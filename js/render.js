@@ -87,7 +87,7 @@ function construirePlateau(plateau) {
         im.alt = c.type;
         if (c.type === "ennemi" && c.ennemi.vaincu) {
           im.style.opacity = ".3";
-          im.style.filter = "grayscale(1)"; // ennemi déjà vaincu = grisé + badge ✔
+          im.style.filter = "grayscale(1)"; // ennemi vaincu = grisé + ✔
         }
         el.appendChild(im);
       } else if (info.label) {
