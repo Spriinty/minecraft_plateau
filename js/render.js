@@ -45,9 +45,9 @@ function libelleContenu(c) {
     }
     case "portail_nether": return { src: null, badge: "🔥 Nether", label: "🌋" };
     case "portail_end": return { src: null, badge: "End", label: "🌀" };
-    case "arrivee": return { src: null, label: "🏆" };
+    case "arrivee": return { texture: "texture/overworld/fin.png", badge: "🏆" };
     case "retour": return { src: null, label: "🏠" };
-    case "depart": return { src: null, label: "🏁" };
+    case "depart": return { texture: "texture/overworld/start.png" };
     default: return null;
   }
 }
