@@ -259,13 +259,18 @@ html, body {
   filter: drop-shadow(1px 4px 3px rgba(0,0,0,.5));
   pointer-events: none;
 }
-/* fantômes sur le plateau */
+/* fantômes sur le plateau — se balancent de gauche à droite sur leur case.
+   NB : l'animation doit inclure translate(-50%) sinon elle écrase le centrage. */
 .fantome-plateau {
-  position: absolute; height: calc(var(--case) * 0.95); object-fit: contain; z-index: 4;
-  opacity: .85; animation: flotte 2s ease-in-out infinite;
+  position: absolute; height: calc(var(--case) * 0.9); object-fit: contain; z-index: 4;
+  opacity: .9; animation: spectre 1.6s ease-in-out infinite;
   pointer-events: none;
 }
-@keyframes flotte { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes spectre {
+  0%   { transform: translate(-64%, -68%); }
+  50%  { transform: translate(-36%, -72%); }
+  100% { transform: translate(-64%, -68%); }
+}
 
 /* =========================================================================
    BARRE D'ACTION (bas)

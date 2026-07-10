@@ -23,6 +23,10 @@ export const RULES = {
   zoneSansEnnemi: 5,       // Aucun ennemi sur les X premières cases après le départ
   coffreGarantiAvant: 4,   // Au moins un coffre dans les X premières cases
   emeraudesParCoffre: [1, 3], // Quand un coffre donne des émeraudes : entre 1 et 3
+
+  // Quand on tombe à 0 cœur : où et avec combien de vie on réapparaît.
+  respawnMonde: "overworld", // toujours renvoyé au monde de départ (pas coincé au Nether)
+  respawnPleineVie: true,    // true = on repart avec tous les cœurs (sinon la moitié)
 };
 
 // -----------------------------------------------------------------------------
@@ -227,6 +231,7 @@ export const PLATEAUX = {
     cases: 60, de: 6, cols: 10,
     densiteEnnemi: 0.30, densiteCoffre: 0.12, densiteNourriture: 0.10,
     nbCompagnons: 3, // cases donnant Denis / Golem / Chat
+    premiereLigneSure: true, // toute la 1re ligne = coffres/nourriture, aucun ennemi
     aUnPortailNether: true, aUnPortailEnd: true, aUnMarchand: true,
     theme: "overworld",
   },

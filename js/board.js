@@ -95,6 +95,17 @@ export function genererPlateau(monde) {
     }
   }
 
+  // 4c) Première ligne "sûre" : que des cases qui aident (coffres/nourriture),
+  //     pour que les deux joueurs démarrent avec du stuff.
+  if (cfg.premiereLigneSure) {
+    for (let i = 1; i < cfg.cols && i < n - 1; i++) {
+      if (reserves.has(i)) continue;
+      const r = Math.random();
+      if (r < 0.6) { cases[i].type = "coffre"; cases[i].coffre = coffreAuHasard(); cases[i].ennemi = null; }
+      else         { cases[i].type = "nourriture"; cases[i].nourriture = auHasard(NOURRITURE).id; cases[i].ennemi = null; }
+    }
+  }
+
   // 5) Cases "compagnon" (Denis / Golem / Chat) placées sur des cases vides
   const idsCompagnons = Object.keys(COMPAGNONS); // ["denis","golem","chat"]
   const nbComp = cfg.nbCompagnons || 0;

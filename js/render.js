@@ -27,7 +27,7 @@ function libelleContenu(c) {
       const n = NOURRITURE.find((x) => x.id === c.nourriture);
       return { src: n.img, badge: `+${n.soin}❤` };
     }
-    case "ennemi": return { src: c.ennemi.img, badge: `⚔${c.ennemi.force}` };
+    case "ennemi": return { src: c.ennemi.img, badge: c.ennemi.vaincu ? null : `⚔${c.ennemi.force}` };
     case "marchand": return { src: "helper/helper_villageois.png", badge: "🛒" };
     case "compagnon": {
       const comp = COMPAGNONS[c.compagnon];
@@ -77,7 +77,10 @@ function construirePlateau(plateau) {
         im.className = "contenu";
         im.src = img(info.src);
         im.alt = c.type;
-        if (c.type === "ennemi" && c.ennemi.vaincu) im.style.opacity = ".25";
+        if (c.type === "ennemi" && c.ennemi.vaincu) {
+          im.style.opacity = ".15";
+          im.style.filter = "grayscale(1)"; // ennemi déjà vaincu = fantomatique
+        }
         el.appendChild(im);
       } else if (info.label) {
         const sp = document.createElement("span");

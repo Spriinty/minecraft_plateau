@@ -167,14 +167,19 @@ async function combattre(joueur, ennemi, fantomeRef = null, caseRef = null) {
   }
 }
 
-// Quand un joueur tombe à 0 cœur : il réapparaît au départ de son monde
+// Quand un joueur tombe à 0 cœur : il réapparaît au départ de l'Overworld,
+// avec toute sa vie (il garde son stuff), pour ne pas rester coincé.
 async function respawn(joueur) {
-  joueur.coeurs = Math.max(2, Math.floor(RULES.coeursMax / 2));
+  const mondeAvant = joueur.monde;
+  joueur.coeurs = RULES.respawnPleineVie ? RULES.coeursMax : Math.max(2, Math.floor(RULES.coeursMax / 2));
+  joueur.monde = RULES.respawnMonde || "overworld";
   joueur.position = 0;
+  joueur.retour = null;
   R.rendreJeu();
+  const txtMonde = mondeAvant !== joueur.monde ? " Tu ressors de ce monde et " : " Tu ";
   await demander({
     titre: "K.O.&nbsp;! 💫",
-    html: `<p>Tu n'as plus de cœurs... Tu réapparais au départ avec ${joueur.coeurs} cœurs.</p>`,
+    html: `<p>Tu n'as plus de cœurs...${txtMonde}réapparais au départ de l'Overworld avec ${joueur.coeurs} cœurs (tu gardes ton équipement).</p>`,
     boutons: [{ texte: "Repartir", valeur: "ok" }],
   });
 }
