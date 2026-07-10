@@ -39,13 +39,13 @@ function libelleContenu(c) {
       const badge = s.effet === "ralenti" ? "÷" + s.valeur
                   : s.effet === "degats" ? "−" + s.valeur + "❤"
                   : signe + s.valeur;
-      // texture en fond de case si dispo, sinon repli sur l'emoji
-      if (c.texture) return { texture: c.texture, badge };
+      // texture : soit un objet centré (sprite), soit un fond de case (tuile)
+      if (c.texture) return s.sprite ? { textureSprite: c.texture, badge } : { texture: c.texture, badge };
       return { src: null, label: s.emoji, badge };
     }
     case "portail_nether": return { src: null, badge: "🔥 Nether", label: "🌋" };
     case "portail_end": return { src: null, badge: "End", label: "🌀" };
-    case "arrivee": return { texture: "texture/overworld/fin.png", badge: "🏆" };
+    case "arrivee": return { textureSprite: "texture/overworld/fin.png", badge: "🏆" };
     case "retour": return { src: null, label: "🏠" };
     case "depart": return { texture: "texture/overworld/start.png" };
     default: return null;
@@ -89,6 +89,14 @@ function construirePlateau(plateau) {
         tx.src = img(info.texture);
         tx.alt = c.type;
         el.appendChild(tx);
+      }
+      if (info.textureSprite) {
+        // objet centré et de taille réduite (comme les autres pions/objets)
+        const sp = document.createElement("img");
+        sp.className = "contenu";
+        sp.src = img(info.textureSprite);
+        sp.alt = c.type;
+        el.appendChild(sp);
       }
       if (info.src) {
         const im = document.createElement("img");

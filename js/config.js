@@ -245,7 +245,7 @@ export const CASES_SPECIALES = {
                 textures: ["texture/ender/trou_end_1.png", "texture/ender/trou_end_2.png"],
                 texte: "Le vide t'aspire et te renvoie {v} cases en arrière&nbsp;!" },
   minecart:   { nom: "Wagonnet",        emoji: "🛒", effet: "avance",  valeur: 3,
-                textures: ["texture/overworld/chariot.png"],
+                textures: ["texture/overworld/chariot.png"], sprite: true, // objet centré, pas un fond
                 texte: "Tu sautes dans un wagonnet et avances de {v} cases&nbsp;!" },
 };
 
