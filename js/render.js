@@ -39,6 +39,8 @@ function libelleContenu(c) {
       const badge = s.effet === "ralenti" ? "÷" + s.valeur
                   : s.effet === "degats" ? "−" + s.valeur + "❤"
                   : signe + s.valeur;
+      // texture en fond de case si dispo, sinon repli sur l'emoji
+      if (c.texture) return { texture: c.texture, badge };
       return { src: null, label: s.emoji, badge };
     }
     case "portail_nether": return { src: null, badge: "🔥 Nether", label: "🌋" };
@@ -80,6 +82,14 @@ function construirePlateau(plateau) {
     // contenu (image ou emoji + badge)
     const info = libelleContenu(c);
     if (info) {
+      if (info.texture) {
+        // image de fond qui couvre toute la case (s'adapte à sa taille)
+        const tx = document.createElement("img");
+        tx.className = "case-texture";
+        tx.src = img(info.texture);
+        tx.alt = c.type;
+        el.appendChild(tx);
+      }
       if (info.src) {
         const im = document.createElement("img");
         im.className = "contenu";

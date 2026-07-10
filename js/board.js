@@ -143,6 +143,9 @@ export function genererPlateau(monde) {
       if (cases[i].type !== "vide") continue;
       cases[i].type = "speciale";
       cases[i].special = spec.type;
+      // texture tirée au hasard dans le pool du type (stable pour cette case)
+      const tex = CASES_SPECIALES[spec.type].textures;
+      cases[i].texture = tex && tex.length ? auHasard(tex) : null;
       mis++;
     }
   }

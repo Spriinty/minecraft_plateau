@@ -226,18 +226,26 @@ export const OFFRES_MARCHAND = [
 //          "avance" (avance de valeur cases — bonus).
 //  {v} dans le texte est remplacé par la valeur.
 // -----------------------------------------------------------------------------
+// "textures" = pool d'images (dossier public/assets/texture/...), tirées au
+// hasard et affichées en fond de case (elles s'adaptent à la taille de la case).
 export const CASES_SPECIALES = {
   grotte:     { nom: "Grotte",          emoji: "🕳️", effet: "recul",   valeur: 3,
+                textures: ["texture/overworld/trou_1.png", "texture/overworld/trou_2.png", "texture/overworld/trou_3.png"],
                 texte: "Tu tombes dans une grotte sombre et recules de {v} cases&nbsp;!" },
   ravin:      { nom: "Ravin",           emoji: "🪨", effet: "recul",   valeur: 2,
+                textures: ["texture/overworld/trou_1.png", "texture/overworld/trou_2.png", "texture/overworld/trou_3.png"],
                 texte: "Un ravin te barre la route, tu recules de {v} cases&nbsp;!" },
   lave:       { nom: "Coulée de lave",  emoji: "🔥", effet: "degats",  valeur: 2,
+                textures: ["texture/nether/lave_1.png", "texture/nether/lave_2.png"],
                 texte: "Tu marches dans la lave et perds {v} cœurs&nbsp;!" },
   sable_ames: { nom: "Sable des âmes",  emoji: "🐌", effet: "ralenti", valeur: 2,
+                textures: ["texture/nether/sable_1.png", "texture/nether/sable_2.png", "texture/nether/sable_3.png"],
                 texte: "Le sable des âmes te ralentit&nbsp;: ton prochain lancer sera divisé par {v}&nbsp;!" },
   faille:     { nom: "Faille du vide",  emoji: "🌌", effet: "recul",   valeur: 3,
+                textures: ["texture/ender/trou_end_1.png", "texture/ender/trou_end_2.png"],
                 texte: "Le vide t'aspire et te renvoie {v} cases en arrière&nbsp;!" },
   minecart:   { nom: "Wagonnet",        emoji: "🛒", effet: "avance",  valeur: 3,
+                textures: ["texture/overworld/chariot.png"],
                 texte: "Tu sautes dans un wagonnet et avances de {v} cases&nbsp;!" },
 };
 
@@ -255,8 +263,8 @@ export const PLATEAUX = {
     nbCompagnons: 3, // cases donnant Denis / Golem / Chat
     premiereLigneSure: true, // toute la 1re ligne = coffres/nourriture, aucun ennemi
     casesSpeciales: [
-      { type: "grotte", nb: 3 },
-      { type: "ravin", nb: 2 },
+      { type: "grotte", nb: 2 },
+      { type: "ravin", nb: 1 },
       { type: "minecart", nb: 2 }, // bonus : avance
     ],
     aUnPortailNether: true, aUnPortailEnd: true, aUnMarchand: true,
@@ -268,8 +276,8 @@ export const PLATEAUX = {
     densiteEnnemi: 0.40, densiteCoffre: 0.15, densiteNourriture: 0.05,
     nbCompagnons: 1,
     casesSpeciales: [
-      { type: "lave", nb: 3 },
-      { type: "sable_ames", nb: 2 },
+      { type: "lave", nb: 2 },
+      { type: "sable_ames", nb: 1 },
     ],
     aUnPortailNether: false, aUnPortailEnd: false, aUnMarchand: false,
     theme: "nether",
@@ -281,7 +289,7 @@ export const PLATEAUX = {
     densiteEnnemi: 0.45, densiteCoffre: 0.15, densiteNourriture: 0.05,
     nbCompagnons: 1,
     casesSpeciales: [
-      { type: "faille", nb: 3 },
+      { type: "faille", nb: 2 },
       { type: "sable_ames", nb: 1 },
     ],
     aUnPortailNether: false, aUnPortailEnd: false, aUnMarchand: false,
