@@ -220,6 +220,28 @@ export const OFFRES_MARCHAND = [
 ];
 
 // -----------------------------------------------------------------------------
+//  LES CASES SPÉCIALES (malus / événements) — inspirées de Minecraft.
+//  effet : "recul" (recule de valeur cases), "degats" (perd valeur cœurs),
+//          "ralenti" (prochain lancer divisé par valeur),
+//          "avance" (avance de valeur cases — bonus).
+//  {v} dans le texte est remplacé par la valeur.
+// -----------------------------------------------------------------------------
+export const CASES_SPECIALES = {
+  grotte:     { nom: "Grotte",          emoji: "🕳️", effet: "recul",   valeur: 3,
+                texte: "Tu tombes dans une grotte sombre et recules de {v} cases&nbsp;!" },
+  ravin:      { nom: "Ravin",           emoji: "🪨", effet: "recul",   valeur: 2,
+                texte: "Un ravin te barre la route, tu recules de {v} cases&nbsp;!" },
+  lave:       { nom: "Coulée de lave",  emoji: "🔥", effet: "degats",  valeur: 2,
+                texte: "Tu marches dans la lave et perds {v} cœurs&nbsp;!" },
+  sable_ames: { nom: "Sable des âmes",  emoji: "🐌", effet: "ralenti", valeur: 2,
+                texte: "Le sable des âmes te ralentit&nbsp;: ton prochain lancer sera divisé par {v}&nbsp;!" },
+  faille:     { nom: "Faille du vide",  emoji: "🌌", effet: "recul",   valeur: 3,
+                texte: "Le vide t'aspire et te renvoie {v} cases en arrière&nbsp;!" },
+  minecart:   { nom: "Wagonnet",        emoji: "🛒", effet: "avance",  valeur: 3,
+                texte: "Tu sautes dans un wagonnet et avances de {v} cases&nbsp;!" },
+};
+
+// -----------------------------------------------------------------------------
 //  LES PLATEAUX — un objet par monde.
 //  cases = nombre de cases. de = valeur max du dé (6 ou 12).
 //  cols = nb de colonnes pour le rangement en serpentin à l'écran.
@@ -232,6 +254,11 @@ export const PLATEAUX = {
     densiteEnnemi: 0.30, densiteCoffre: 0.12, densiteNourriture: 0.10,
     nbCompagnons: 3, // cases donnant Denis / Golem / Chat
     premiereLigneSure: true, // toute la 1re ligne = coffres/nourriture, aucun ennemi
+    casesSpeciales: [
+      { type: "grotte", nb: 3 },
+      { type: "ravin", nb: 2 },
+      { type: "minecart", nb: 2 }, // bonus : avance
+    ],
     aUnPortailNether: true, aUnPortailEnd: true, aUnMarchand: true,
     theme: "overworld",
   },
@@ -240,6 +267,10 @@ export const PLATEAUX = {
     cases: 24, de: 6, cols: 8,
     densiteEnnemi: 0.40, densiteCoffre: 0.15, densiteNourriture: 0.05,
     nbCompagnons: 1,
+    casesSpeciales: [
+      { type: "lave", nb: 3 },
+      { type: "sable_ames", nb: 2 },
+    ],
     aUnPortailNether: false, aUnPortailEnd: false, aUnMarchand: false,
     theme: "nether",
     recompenseSortie: "epee_diamant", // récompense quand on ressort du Nether
@@ -249,6 +280,10 @@ export const PLATEAUX = {
     cases: 24, de: 6, cols: 8,
     densiteEnnemi: 0.45, densiteCoffre: 0.15, densiteNourriture: 0.05,
     nbCompagnons: 1,
+    casesSpeciales: [
+      { type: "faille", nb: 3 },
+      { type: "sable_ames", nb: 1 },
+    ],
     aUnPortailNether: false, aUnPortailEnd: false, aUnMarchand: false,
     theme: "end",
     recompenseSortie: "epee_netherite",

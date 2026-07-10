@@ -243,6 +243,12 @@ html, body {
 .case.nourriture { background: rgba(58,123,213,.22); }
 .case.marchand { background: rgba(46,204,113,.25); }
 .case.compagnon { background: rgba(255,193,7,.25); box-shadow: inset 0 0 0 2px rgba(255,193,7,.5); }
+/* cases spéciales (malus/bonus) */
+.case.speciale { background: rgba(0,0,0,.28); box-shadow: inset 0 0 0 2px rgba(255,255,255,.18); }
+.case.sp-lave      { background: rgba(255,90,20,.30); box-shadow: inset 0 0 0 2px rgba(255,120,40,.6); }
+.case.sp-sable_ames{ background: rgba(120,90,60,.35); box-shadow: inset 0 0 0 2px rgba(160,130,90,.6); }
+.case.sp-faille    { background: rgba(90,50,150,.35); box-shadow: inset 0 0 0 2px rgba(160,120,230,.6); }
+.case.sp-minecart  { background: rgba(46,160,90,.28); box-shadow: inset 0 0 0 2px rgba(80,220,130,.6); }
 .case.portail_nether { background: rgba(200,40,20,.4); box-shadow: inset 0 0 0 3px #ff6a3d; }
 .case.portail_end    { background: rgba(120,60,200,.4); box-shadow: inset 0 0 0 3px #b388ff; }
 .case.retour   { background: rgba(120,120,255,.35); box-shadow: inset 0 0 0 3px #90caf9; }
@@ -255,7 +261,7 @@ html, body {
 /* Pions posés sur le plateau — taille calée sur celle d'une case */
 .pion-plateau {
   position: absolute; height: calc(var(--case) * 1.18); object-fit: contain; z-index: 5;
-  transition: left .35s ease, top .35s ease;
+  transition: left .2s linear, top .2s linear;
   filter: drop-shadow(1px 4px 3px rgba(0,0,0,.5));
   pointer-events: none;
 }

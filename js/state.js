@@ -30,6 +30,7 @@ export function creerJoueur(idx, pionId) {
     armes: [],        // liste d'ids d'armes possédées
     armures: [],      // liste d'ids d'armures possédées
     emeraudes: 0,     // monnaie pour le marchand
+    deDivise: 1,      // diviseur du prochain lancer (sable des âmes)
     boucliers: 0,     // nombre de boucliers
     denis: false,     // compagnon loup
     golem: false,     // golem de fer (usage unique)

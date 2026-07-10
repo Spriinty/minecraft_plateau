@@ -2,7 +2,7 @@
 //  BOARD.JS — Génère les plateaux (liste de cases) selon la config.
 //  Chaque case = { index, type, ...données selon le type }
 // =============================================================================
-import { ENNEMIS, COFFRES, NOURRITURE, COMPAGNONS, PLATEAUX, RULES } from "./config.js";
+import { ENNEMIS, COFFRES, NOURRITURE, COMPAGNONS, CASES_SPECIALES, PLATEAUX, RULES } from "./config.js";
 import { alea, auHasard, chance } from "./utils.js";
 
 // Types de cases :
@@ -20,6 +20,17 @@ function coffreAuHasard() {
 function ennemiAuHasard(monde) {
   const modele = auHasard(ENNEMIS[monde]);
   return { ...modele, vaincu: false }; // copie pour que chaque case soit indépendante
+}
+
+// Choisit un ennemi dont la force correspond à l'avancement sur le plateau :
+// faibles au début, forts vers la fin (avec un peu de hasard pour la variété).
+function ennemiSelonProgression(monde, i, n) {
+  const liste = [...ENNEMIS[monde]].sort((a, b) => a.force - b.force);
+  const ratio = i / (n - 1);                 // 0 au départ, 1 à l'arrivée
+  let idx = Math.round(ratio * (liste.length - 1));
+  idx += alea(-1, 1);                         // petite variation
+  idx = Math.max(0, Math.min(liste.length - 1, idx));
+  return { ...liste[idx], vaincu: false };
 }
 
 // Génère un plateau pour un monde donné ("overworld" | "nether" | "end")
@@ -62,7 +73,7 @@ export function genererPlateau(monde) {
     const r = Math.random();
     if (r < cfg.densiteEnnemi) {
       cases[i].type = "ennemi";
-      cases[i].ennemi = ennemiAuHasard(monde);
+      cases[i].ennemi = ennemiSelonProgression(monde, i, n);
     } else if (r < cfg.densiteEnnemi + cfg.densiteCoffre) {
       cases[i].type = "coffre";
       cases[i].coffre = coffreAuHasard();
@@ -95,14 +106,16 @@ export function genererPlateau(monde) {
     }
   }
 
-  // 4c) Première ligne "sûre" : que des cases qui aident (coffres/nourriture),
-  //     pour que les deux joueurs démarrent avec du stuff.
+  // 4c) Première ligne "sûre" : que des COFFRES (stuff + émeraudes), pas de
+  //     nourriture (inutile tant qu'on n'a pas perdu de vie). Les deux joueurs
+  //     démarrent ainsi avec de l'équipement.
   if (cfg.premiereLigneSure) {
     for (let i = 1; i < cfg.cols && i < n - 1; i++) {
       if (reserves.has(i)) continue;
-      const r = Math.random();
-      if (r < 0.6) { cases[i].type = "coffre"; cases[i].coffre = coffreAuHasard(); cases[i].ennemi = null; }
-      else         { cases[i].type = "nourriture"; cases[i].nourriture = auHasard(NOURRITURE).id; cases[i].ennemi = null; }
+      cases[i].type = "coffre";
+      cases[i].coffre = coffreAuHasard();
+      cases[i].ennemi = null;
+      cases[i].nourriture = null;
     }
   }
 
@@ -117,6 +130,21 @@ export function genererPlateau(monde) {
     cases[i].type = "compagnon";
     cases[i].compagnon = idsCompagnons[poses % idsCompagnons.length];
     poses++;
+  }
+
+  // 6) Cases spéciales (grotte, lave, sable des âmes, faille, wagonnet...)
+  //    placées sur des cases vides, en dehors de la zone de départ.
+  for (const spec of cfg.casesSpeciales || []) {
+    if (!CASES_SPECIALES[spec.type]) continue;
+    let mis = 0, tries = 0;
+    while (mis < spec.nb && tries < 300) {
+      tries++;
+      const i = alea(zone + 1, n - 2);
+      if (cases[i].type !== "vide") continue;
+      cases[i].type = "speciale";
+      cases[i].special = spec.type;
+      mis++;
+    }
   }
 
   return { monde, cfg, cases };

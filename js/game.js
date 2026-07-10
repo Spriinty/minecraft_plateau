@@ -2,7 +2,7 @@
 //  GAME.JS — La logique du jeu : tours, dé, déplacements, événements, combat.
 // =============================================================================
 import { ASSETS, RULES, PLATEAUX, COFFRES, BUTIN, NOURRITURE, ARMES, ARMURES, FANTOME,
-         COMPAGNONS, VILLAGEOIS, OFFRES_MARCHAND, EMERAUDE } from "./config.js";
+         COMPAGNONS, VILLAGEOIS, OFFRES_MARCHAND, EMERAUDE, CASES_SPECIALES } from "./config.js";
 import { alea, auHasard, chance, tirageParPoids, pause } from "./utils.js";
 import { resoudreCombat } from "./combat.js";
 import * as R from "./render.js";
@@ -36,12 +36,32 @@ export async function jouerTour() {
   btn.disabled = true;
 
   const joueur = joueurActif();
+
+  // Un fantôme a-t-il dérivé sur ma case entre deux tours ? Si oui, il m'attaque
+  // AVANT que je joue (corrige l'incohérence où c'était le joueur suivant qui
+  // "récupérait" le combat).
+  const fantomeSurMoi = state.fantomes.find(
+    (f) => f.monde === joueur.monde && f.position === joueur.position
+  );
+  if (fantomeSurMoi) {
+    await combattre(joueur, { ...FANTOME }, fantomeSurMoi);
+    R.rendreJeu();
+  }
+
   const plateau = plateauDe(joueur);
   const maxDe = plateau.cfg.de;
 
   // Animation du dé (quelques valeurs qui défilent)
   for (let i = 0; i < 6; i++) { R.afficherDe(alea(1, maxDe)); await pause(70); }
-  const valeur = alea(1, maxDe);
+  // Crochet de debug/test : window.__forceDe force la valeur du prochain lancer
+  let valeur = (typeof window !== "undefined" && window.__forceDe)
+    ? Math.min(maxDe, window.__forceDe) : alea(1, maxDe);
+  if (typeof window !== "undefined") window.__forceDe = null;
+  // Sable des âmes : le prochain lancer est divisé
+  if (joueur.deDivise && joueur.deDivise > 1) {
+    valeur = Math.max(1, Math.ceil(valeur / joueur.deDivise));
+    joueur.deDivise = 1;
+  }
   R.afficherDe(valeur);
   await pause(350);
 
@@ -63,9 +83,10 @@ async function deplacer(joueur, pas) {
     if (joueur.position < dernier) {
       joueur.position++;
       R.placerPions();
-      await pause(180);
+      await pause(200);
     }
   }
+  await pause(220); // laisse le pion finir de glisser avant d'ouvrir un événement
   await resoudreCase(joueur);
 }
 
@@ -76,13 +97,17 @@ async function resoudreCase(joueur) {
   const plateau = plateauDe(joueur);
   const c = plateau.cases[joueur.position];
 
-  // Un fantôme est-il sur cette case ?
+  // Un fantôme est-il sur cette case ? On le combat, puis on continue à
+  // résoudre le contenu de la case (sauf si on a été renvoyé au départ).
   const fantomeIci = state.fantomes.find(
     (f) => f.monde === joueur.monde && f.position === joueur.position
   );
   if (fantomeIci) {
     await combattre(joueur, { ...FANTOME }, fantomeIci);
-    return;
+    if (joueur.position !== c.index || joueur.monde !== plateau.monde) {
+      sauvegarder();
+      return; // respawn : on n'ouvre pas l'ancienne case
+    }
   }
 
   switch (c.type) {
@@ -100,6 +125,9 @@ async function resoudreCase(joueur) {
       break;
     case "compagnon":
       await ramasserCompagnon(joueur, c);
+      break;
+    case "speciale":
+      await caseSpeciale(joueur, c);
       break;
     case "portail_nether":
       await portail(joueur, "nether");
@@ -268,6 +296,42 @@ async function ramasserCompagnon(joueur, c) {
 }
 
 // =============================================================================
+//  CASES SPÉCIALES (grotte, lave, sable des âmes, faille, wagonnet...)
+// =============================================================================
+async function caseSpeciale(joueur, c) {
+  const s = CASES_SPECIALES[c.special];
+  const plateau = plateauDe(joueur);
+  const dernier = plateau.cases.length - 1;
+  const texte = s.texte.replace("{v}", s.valeur);
+
+  const afficher = async (titreClasse = "perte") => {
+    await demander({
+      titre: `${s.emoji} ${s.nom}`,
+      html: `<p class="${titreClasse}">${texte}</p>`,
+      boutons: [{ texte: "Continuer", valeur: "ok" }],
+    });
+  };
+
+  if (s.effet === "recul") {
+    joueur.position = Math.max(0, joueur.position - s.valeur);
+    R.placerPions();
+    await afficher("perte");
+  } else if (s.effet === "avance") {
+    joueur.position = Math.min(dernier, joueur.position + s.valeur);
+    R.placerPions();
+    await afficher("gain");
+  } else if (s.effet === "degats") {
+    const mort = blesser(joueur, s.valeur);
+    R.rendreHud();
+    await afficher("perte");
+    if (mort) await respawn(joueur);
+  } else if (s.effet === "ralenti") {
+    joueur.deDivise = s.valeur; // s'applique au prochain lancer
+    await afficher("perte");
+  }
+}
+
+// =============================================================================
 //  MARCHAND (villageois)
 // =============================================================================
 async function marchand(joueur) {
@@ -390,10 +454,13 @@ function deplacerEnnemis() {
       const c = cases[i];
       if (c.type !== "ennemi" || c.ennemi.vaincu) continue;
       if (!chance(RULES.chanceDeplacementEnnemi)) continue;
-      // essaie de bouger vers une case voisine vide
+      // essaie de bouger vers une case voisine vide ET non occupée par un joueur
       const dir = chance(0.5) ? 1 : -1;
       const j = i + dir;
-      if (j > 0 && j < cases.length - 1 && cases[j].type === "vide") {
+      const occupeeParJoueur = state.joueurs.some(
+        (p) => p.monde === monde && p.position === j && !p.aGagne
+      );
+      if (j > 0 && j < cases.length - 1 && cases[j].type === "vide" && !occupeeParJoueur) {
         cases[j].type = "ennemi";
         cases[j].ennemi = c.ennemi;
         c.type = "vide"; c.ennemi = null;

@@ -35,6 +35,9 @@ function reprendrePartie() {
 }
 
 function init() {
+  // Expose l'état (pratique pour le débogage / les tests)
+  window.__state = state;
+
   // Écran d'accueil
   allerAccueil();
 

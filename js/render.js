@@ -1,7 +1,7 @@
 // =============================================================================
 //  RENDER.JS — Tout l'affichage (DOM). Lit l'état, ne le modifie pas.
 // =============================================================================
-import { ASSETS, PLATEAUX, COFFRES, NOURRITURE, ENNEMIS, FANTOME, COMPAGNONS } from "./config.js";
+import { ASSETS, PLATEAUX, COFFRES, NOURRITURE, ENNEMIS, FANTOME, COMPAGNONS, CASES_SPECIALES } from "./config.js";
 import { positionSerpentin } from "./board.js";
 import { state, joueurActif, meilleureArme, meilleureArmure } from "./state.js";
 
@@ -27,11 +27,19 @@ function libelleContenu(c) {
       const n = NOURRITURE.find((x) => x.id === c.nourriture);
       return { src: n.img, badge: `+${n.soin}❤` };
     }
-    case "ennemi": return { src: c.ennemi.img, badge: c.ennemi.vaincu ? null : `⚔${c.ennemi.force}` };
+    case "ennemi": return { src: c.ennemi.img, badge: c.ennemi.vaincu ? "✔" : `⚔${c.ennemi.force}` };
     case "marchand": return { src: "helper/helper_villageois.png", badge: "🛒" };
     case "compagnon": {
       const comp = COMPAGNONS[c.compagnon];
       return { src: comp.img, badge: "🤝" };
+    }
+    case "speciale": {
+      const s = CASES_SPECIALES[c.special];
+      const signe = s.effet === "avance" ? "+" : (s.effet === "degats" ? "" : "−");
+      const badge = s.effet === "ralenti" ? "÷" + s.valeur
+                  : s.effet === "degats" ? "−" + s.valeur + "❤"
+                  : signe + s.valeur;
+      return { src: null, label: s.emoji, badge };
     }
     case "portail_nether": return { src: null, badge: "🔥 Nether", label: "🌋" };
     case "portail_end": return { src: null, badge: "End", label: "🌀" };
@@ -59,7 +67,7 @@ function construirePlateau(plateau) {
   for (const c of plateau.cases) {
     const { ligne, col } = positionSerpentin(c.index, cfg.cols);
     const el = document.createElement("div");
-    el.className = `case ${c.type}`;
+    el.className = `case ${c.type}` + (c.special ? ` sp-${c.special}` : "");
     el.style.gridColumn = col + 1;
     el.style.gridRow = ligne + 1;
 
@@ -78,8 +86,8 @@ function construirePlateau(plateau) {
         im.src = img(info.src);
         im.alt = c.type;
         if (c.type === "ennemi" && c.ennemi.vaincu) {
-          im.style.opacity = ".15";
-          im.style.filter = "grayscale(1)"; // ennemi déjà vaincu = fantomatique
+          im.style.opacity = ".3";
+          im.style.filter = "grayscale(1)"; // ennemi déjà vaincu = grisé + badge ✔
         }
         el.appendChild(im);
       } else if (info.label) {
@@ -109,7 +117,7 @@ function poser(el, index, rangEmpilement = 0, yPct = -55) {
   if (!caseEl) return;
   const cx = caseEl.offsetLeft + caseEl.offsetWidth / 2;
   const cy = caseEl.offsetTop + caseEl.offsetHeight / 2;
-  el.style.left = `${cx + rangEmpilement * 14 - 8}px`;
+  el.style.left = `${cx + rangEmpilement * 14}px`;
   el.style.top = `${cy}px`;
   el.style.transform = `translate(-50%, ${yPct}%)`;
 }
