@@ -131,25 +131,26 @@ html, body {
    ========================================================================= */
 #ecran-jeu { flex-direction: column; }
 #hud {
-  display: flex; align-items: center; gap: 10px; padding: 8px 14px;
+  display: flex; align-items: center; gap: 8px; padding: 5px 12px;
   background: linear-gradient(var(--terre), var(--terre-fonce));
   border-bottom: 3px solid rgba(0,0,0,.4); z-index: 20;
 }
-#hud-joueurs { display: flex; gap: 12px; flex: 1; overflow-x: auto; }
+#hud-joueurs { display: flex; gap: 8px; flex: 1; overflow-x: auto; }
 .hud-joueur {
-  display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,.25);
-  border-radius: 12px; padding: 8px 14px; border: 3px solid transparent; flex: 0 0 auto;
+  display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,.25);
+  border-radius: 10px; padding: 5px 10px; border: 2px solid transparent; flex: 0 0 auto;
 }
 .hud-joueur.actif { border-color: var(--or); background: rgba(249,194,46,.15); }
 .hud-joueur.mort { opacity: .4; }
-.hud-joueur .mini-pion { width: 52px; height: 62px; object-fit: contain; }
-.hud-joueur .infos { font-size: 15px; line-height: 1.35; }
-.hud-joueur .coeurs { font-size: 20px; letter-spacing: -1px; }
-.hud-joueur .stuff { display: flex; gap: 5px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
-.hud-joueur .stuff img { width: 30px; height: 30px; object-fit: contain; }
+.hud-joueur .mini-pion { width: 42px; height: 50px; object-fit: contain; }
+.hud-joueur .infos { font-size: 13px; line-height: 1.25; }
+.hud-joueur .coeurs { font-size: 16px; letter-spacing: -1px; }
+/* nowrap : le stuff reste sur UNE ligne (le HUD ne grandit pas en hauteur) */
+.hud-joueur .stuff { display: flex; gap: 4px; align-items: center; margin-top: 3px; flex-wrap: nowrap; }
+.hud-joueur .stuff img { width: 24px; height: 24px; object-fit: contain; }
 .hud-joueur .stuff .attaque-badge {
-  font-size: 13px; font-weight: 700; background: var(--rouge); border-radius: 5px;
-  padding: 1px 5px; margin-left: -3px;
+  font-size: 11px; font-weight: 700; background: var(--rouge); border-radius: 5px;
+  padding: 0 4px; margin-left: -3px;
 }
 
 #hud-centre { text-align: center; }
@@ -344,4 +345,28 @@ html, body {
    ========================================================================= */
 @media (max-width: 1100px) { :root { --case: 76px; } }
 @media (max-width: 820px)  { :root { --case: 62px; } .btn-de { min-width: 160px; font-size: 18px; } }
-@media (max-height: 560px) { :root { --case: 58px; } }
+
+/* Adaptation à la HAUTEUR d'écran (tablette paysage) : le plateau ET le HUD
+   rétrécissent pour tout faire tenir sans que le HUD déborde sur le plateau.
+   Rangées de la plus grande à la plus petite hauteur (la dernière l'emporte). */
+@media (max-height: 880px) {
+  :root { --case: 74px; }
+  #hud { padding: 4px 10px; }
+  .hud-joueur { padding: 4px 8px; gap: 6px; }
+  .hud-joueur .mini-pion { width: 34px; height: 40px; }
+  .hud-joueur .coeurs { font-size: 14px; }
+  .hud-joueur .infos { font-size: 12px; }
+  .hud-joueur .stuff img { width: 20px; height: 20px; }
+  .btn-de { padding: 10px 22px; font-size: 18px; }
+}
+@media (max-height: 760px) {
+  :root { --case: 62px; }
+  .hud-joueur .mini-pion { width: 30px; height: 34px; }
+  #barre-action { padding: 6px; }
+  .btn-de { padding: 8px 18px; }
+}
+@media (max-height: 560px) {
+  :root { --case: 54px; }
+  #hud { padding: 3px 8px; }
+  .hud-joueur .mini-pion { width: 26px; height: 30px; }
+}
