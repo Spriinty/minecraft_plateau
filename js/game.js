@@ -14,17 +14,34 @@ import {
 
 let occupe = false; // empêche de relancer le dé pendant une action
 
-// Petite modale qui attend le clic d'un bouton et renvoie sa valeur
+// Petite modale qui attend le clic d'un bouton et renvoie sa valeur.
+// Si le joueur actif est un robot, un choix est fait automatiquement
+// (le bouton marqué iaDefaut, sinon le premier) — sauf sur l'écran de fin.
 function demander({ titre, html = "", img = null, boutons }) {
   return new Promise((resolve) => {
+    let resolu = false;
+    const choisir = (val) => { if (resolu) return; resolu = true; R.fermerModale(); resolve(val); };
     R.modale({
       titre, html, img,
-      boutons: boutons.map((b) => ({
-        ...b,
-        onClick: () => { R.fermerModale(); resolve(b.valeur); },
-      })),
+      boutons: boutons.map((b) => ({ ...b, onClick: () => choisir(b.valeur) })),
     });
+    const j = joueurActif();
+    if (j && j.estIA && !state.fini) {
+      const pref = boutons.find((b) => b.iaDefaut) || boutons[0];
+      setTimeout(() => choisir(pref.valeur), 950);
+    }
   });
+}
+
+// Enchaîne automatiquement les tours des robots jusqu'au prochain humain.
+export async function enchainerIA() {
+  const btn = document.querySelector("#btn-de");
+  while (!state.fini && joueurActif() && joueurActif().estIA) {
+    if (btn) btn.disabled = true;
+    await pause(700);
+    await jouerTour();
+  }
+  if (btn && !state.fini) btn.disabled = false;
 }
 
 // =============================================================================
@@ -162,7 +179,7 @@ async function combattre(joueur, ennemi, fantomeRef = null, caseRef = null) {
   // Aperçu du combat (attaque prévue sans golem)
   const apercu = resoudreCombat(joueur, ennemi, { utiliserGolem: false });
 
-  const boutons = [{ texte: "Attaquer ⚔️", valeur: "attaque", classe: "btn-principal" }];
+  const boutons = [{ texte: "Attaquer ⚔️", valeur: "attaque", classe: "btn-principal", iaDefaut: true }];
   if (peutGolem) boutons.push({ texte: "Lâcher le Golem 🗿", valeur: "golem", classe: "btn-secondaire" });
 
   const html = `
@@ -359,6 +376,14 @@ async function marchand(joueur) {
     desactive: solde < o.prix,
   }));
   boutons.push({ texte: "Partir", valeur: "partir", classe: "btn-secondaire" });
+
+  // Robot : achète l'offre la plus chère qu'il peut se payer, sinon repart
+  if (joueur.estIA) {
+    let best = -1, bestPrix = -1;
+    OFFRES_MARCHAND.forEach((o, i) => { if (solde >= o.prix && o.prix > bestPrix) { bestPrix = o.prix; best = i; } });
+    if (best >= 0) boutons[best].iaDefaut = true;
+    else boutons[boutons.length - 1].iaDefaut = true;
+  }
 
   const choix = await demander({ titre: "🛒 Le Marchand", img: VILLAGEOIS.img, html, boutons });
   if (!choix || choix === "partir") return;

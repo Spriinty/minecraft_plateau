@@ -6,8 +6,12 @@ import { $, creer } from "./utils.js";
 
 const img = (chemin) => `${ASSETS}/${chemin}`;
 
-// Sélection en cours : nb de joueurs + pion choisi par chacun
-const selection = { nb: 2, pions: [null, null, null, null] };
+// Sélection en cours : nb de joueurs + pion choisi par chacun + humain/robot
+const selection = {
+  nb: 2,
+  pions: [null, null, null, null],
+  ia: [false, false, false, false], // le joueur 1 reste toujours humain
+};
 
 // Construit tout l'écran d'accueil
 export function construireAccueil() {
@@ -44,6 +48,17 @@ function rebâtir() {
 function carteJoueur(i) {
   const carte = creer("div", "carte-joueur");
   carte.appendChild(creer("h3", "", { text: `Joueur ${i + 1}` }));
+
+  // Bascule Humain / Robot (le joueur 1 est toujours humain)
+  if (i === 0) {
+    carte.appendChild(creer("div", "type-joueur fixe", { text: "🧑 Humain" }));
+  } else {
+    const t = creer("button", "type-joueur btn-type");
+    t.innerHTML = selection.ia[i] ? "🤖 Robot" : "🧑 Humain";
+    t.classList.toggle("robot", selection.ia[i]);
+    t.onclick = () => { selection.ia[i] = !selection.ia[i]; construireAccueil(); };
+    carte.appendChild(t);
+  }
 
   const choisiId = selection.pions[i];
   const choisi = PIONS.find((p) => p.id === choisiId);
@@ -87,13 +102,18 @@ function majBoutonJouer() {
   $("#btn-jouer").disabled = !tousChoisis;
 }
 
-// Renvoie la liste des pions choisis (pour démarrer la partie)
+// Renvoie la config des joueurs choisis : [{ id, estIA }]
 export function pionsChoisis() {
-  return selection.pions.slice(0, selection.nb).filter(Boolean);
+  const out = [];
+  for (let i = 0; i < selection.nb; i++) {
+    if (selection.pions[i]) out.push({ id: selection.pions[i], estIA: i === 0 ? false : selection.ia[i] });
+  }
+  return out;
 }
 
 // Pré-remplit une sélection par défaut (les 2 premiers pions) pour aller vite
 export function selectionParDefaut() {
   selection.nb = 2;
   selection.pions = [PIONS[0].id, PIONS[1].id, null, null];
+  selection.ia = [false, false, false, false];
 }

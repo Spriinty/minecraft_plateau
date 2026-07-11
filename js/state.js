@@ -20,11 +20,12 @@ export const state = {
 };
 
 // Crée un joueur neuf à partir d'un id de pion
-export function creerJoueur(idx, pionId) {
+export function creerJoueur(idx, pionId, estIA = false) {
   const pion = PIONS.find((p) => p.id === pionId) || PIONS[0];
   return {
     idx,
     pion,
+    estIA,            // vrai = joué automatiquement par l'ordinateur (robot)
     coeurs: RULES.coeursDepart,
     monde: "overworld",
     position: 0,
@@ -41,9 +42,10 @@ export function creerJoueur(idx, pionId) {
   };
 }
 
-// Démarre une nouvelle partie
-export function nouvellePartie(pionIds) {
-  state.joueurs = pionIds.map((id, i) => creerJoueur(i, id));
+// Démarre une nouvelle partie.
+// config = liste de { id: <pionId>, estIA: <bool> }
+export function nouvellePartie(config) {
+  state.joueurs = config.map((c, i) => creerJoueur(i, c.id, !!c.estIA));
   state.jTour = 0;
   state.tour = 1;
   state.fini = false;

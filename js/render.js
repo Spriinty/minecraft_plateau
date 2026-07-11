@@ -251,7 +251,10 @@ export function rendreHud() {
     if (j.emeraudes > 0) stuffHtml += `<img src="${img("helper/emeraude.png")}" title="Émeraudes"><span class="attaque-badge" style="background:#2ecc71">${j.emeraudes}</span>`;
 
     el.innerHTML = `
-      <img class="mini-pion" src="${img(j.pion.img)}">
+      <div class="pion-wrap">
+        <img class="mini-pion" src="${img(j.pion.img)}">
+        ${j.estIA ? '<span class="ia-tag" title="Robot">🤖</span>' : ""}
+      </div>
       <div class="infos">
         <div class="coeurs">${coeursHtml(j)}</div>
         <div class="stuff">${stuffHtml || "<span style='font-size:11px;opacity:.6'>rien</span>"}</div>

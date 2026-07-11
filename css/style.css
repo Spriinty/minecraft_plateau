@@ -103,7 +103,15 @@ html, body {
   background: rgba(0,0,0,.3); border-radius: 12px; padding: 12px;
   border: 2px solid rgba(255,255,255,.08);
 }
-.carte-joueur h3 { font-size: 15px; margin-bottom: 8px; }
+.carte-joueur h3 { font-size: 15px; margin-bottom: 6px; }
+.type-joueur {
+  font-size: 13px; font-weight: 700; padding: 5px 10px; border-radius: 8px;
+  margin-bottom: 8px; display: inline-block; color: var(--texte);
+}
+.type-joueur.fixe { background: rgba(255,255,255,.08); opacity: .8; }
+.btn-type { background: var(--vert); border: none; cursor: pointer; border-bottom: 3px solid rgba(0,0,0,.3); }
+.btn-type.robot { background: var(--bleu); }
+.btn-type:active { transform: translateY(1px); }
 .carte-joueur .pion-choisi {
   height: 90px; display: flex; align-items: center; justify-content: center;
 }
@@ -142,7 +150,10 @@ html, body {
 }
 .hud-joueur.actif { border-color: var(--or); background: rgba(249,194,46,.15); }
 .hud-joueur.mort { opacity: .4; }
-.hud-joueur .mini-pion { width: 42px; height: 50px; object-fit: contain; }
+.hud-joueur .pion-wrap { position: relative; flex: 0 0 auto; }
+.hud-joueur .mini-pion { width: 42px; height: 50px; object-fit: contain; display: block; }
+.hud-joueur .ia-tag { position: absolute; bottom: -2px; right: -5px; font-size: 15px;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
 .hud-joueur .infos { font-size: 13px; line-height: 1.25; }
 .hud-joueur .coeurs { font-size: 16px; letter-spacing: -1px; }
 /* nowrap : le stuff reste sur UNE ligne (le HUD ne grandit pas en hauteur) */
