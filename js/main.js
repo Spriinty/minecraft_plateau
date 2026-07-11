@@ -66,9 +66,13 @@ function init() {
     allerAccueil();
   });
 
-  // Repositionner les pions si on tourne/redimensionne l'écran
+  // Recalculer la taille des cases + repositionner si on tourne/redimensionne
   window.addEventListener("resize", () => {
-    if (!$("#ecran-jeu").hidden) { R.placerPions(); R.placerFantomes(); }
+    if (!$("#ecran-jeu").hidden) R.reflow();
+  });
+  // iOS : la barre Safari change de hauteur au scroll → on réajuste
+  window.addEventListener("orientationchange", () => {
+    setTimeout(() => { if (!$("#ecran-jeu").hidden) R.reflow(); }, 250);
   });
 }
 

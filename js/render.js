@@ -52,6 +52,23 @@ function libelleContenu(c) {
   }
 }
 
+// Calcule la plus grande taille de case qui fait tenir TOUT le plateau dans
+// l'espace réellement disponible (largeur ET hauteur), sur n'importe quel écran.
+function ajusterTailleCase(plateau) {
+  const zone = $("#zone-plateau");
+  if (!zone) return;
+  const cfg = plateau.cfg;
+  const cols = cfg.cols;
+  const rows = Math.ceil(plateau.cases.length / cols);
+  const GAP = 6, PAD_PLATEAU = 12 * 2, PAD_ZONE = 16 * 2, MARGE = 4;
+  const dispoW = zone.clientWidth - PAD_ZONE - PAD_PLATEAU - (cols - 1) * GAP - MARGE;
+  const dispoH = zone.clientHeight - PAD_ZONE - PAD_PLATEAU - (rows - 1) * GAP - MARGE;
+  if (dispoW <= 0 || dispoH <= 0) return;
+  let taille = Math.floor(Math.min(dispoW / cols, dispoH / rows));
+  taille = Math.max(34, Math.min(112, taille)); // bornes de sécurité
+  document.documentElement.style.setProperty("--case", taille + "px");
+}
+
 function construirePlateau(plateau) {
   const plateauEl = $("#plateau");
   plateauEl.innerHTML = "";
@@ -62,6 +79,7 @@ function construirePlateau(plateau) {
   const cfg = plateau.cfg;
   plateauEl.className = `theme-${cfg.theme}`;
   plateauEl.style.gridTemplateColumns = `repeat(${cfg.cols}, var(--case))`;
+  ajusterTailleCase(plateau); // taille de case adaptée à l'espace réel
   // décor animé (eau / lave / void) + image de fond selon le monde
   const zone = document.querySelector("#zone-plateau");
   if (zone) {
@@ -258,6 +276,16 @@ export function rendreJeu() {
   const plateau = state.plateaux[j.monde];
   construirePlateau(plateau);
   rendreHud();
+  placerPions();
+  placerFantomes();
+}
+
+// Recalcule la taille des cases et repositionne (rotation / redimensionnement),
+// sans tout reconstruire.
+export function reflow() {
+  const j = joueurActif();
+  if (!j) return;
+  ajusterTailleCase(state.plateaux[j.monde]);
   placerPions();
   placerFantomes();
 }
