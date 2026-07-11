@@ -250,10 +250,13 @@ export function rendreHud() {
 }
 
 // --- Rendu complet du jeu ----------------------------------------------------
+// On reconstruit TOUJOURS le plateau : ainsi l'affichage colle en permanence à
+// l'état réel (déplacements d'ennemis, nouvelle partie, changement de skin...).
+// L'animation de déplacement du pion, elle, passe par placerPions() (pas ici).
 export function rendreJeu() {
   const j = joueurActif();
   const plateau = state.plateaux[j.monde];
-  if (mondeAffiche !== j.monde) construirePlateau(plateau);
+  construirePlateau(plateau);
   rendreHud();
   placerPions();
   placerFantomes();

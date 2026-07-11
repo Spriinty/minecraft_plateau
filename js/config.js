@@ -16,7 +16,7 @@ export const RULES = {
   coeursMax: 10,           // Maximum de cœurs (la nourriture ne dépasse pas ça)
   fantomeApresTours: 3,    // Un fantôme apparaît après ce nombre de tours de jeu
   fantomeToutLesXTours: 3, // ...puis un nouveau tous les X tours
-  chanceDeplacementEnnemi: 0.35, // Probabilité (0 à 1) qu'un ennemi bouge à chaque tour
+  chanceDeplacementEnnemi: 0.15, // Probabilité (0 à 1) qu'un ennemi bouge à chaque tour (de temps en temps)
   memeCaseCombat: true,    // Combat quand on tombe pile sur un ennemi
   // Équilibrage du début de partie : on veut trouver de l'équipement AVANT
   // de croiser un ennemi.
