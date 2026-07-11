@@ -2,13 +2,14 @@
 //  GAME.JS — La logique du jeu : tours, dé, déplacements, événements, combat.
 // =============================================================================
 import { ASSETS, RULES, PLATEAUX, COFFRES, BUTIN, NOURRITURE, ARMES, ARMURES, FANTOME,
-         COMPAGNONS, VILLAGEOIS, OFFRES_MARCHAND, EMERAUDE, CASES_SPECIALES } from "./config.js";
+         COMPAGNONS, VILLAGEOIS, OFFRES_MARCHAND, EMERAUDE, CASES_SPECIALES,
+         BOSS_END, BEBE_DRAGON } from "./config.js";
 import { alea, auHasard, chance, tirageParPoids, pause } from "./utils.js";
 import { resoudreCombat } from "./combat.js";
 import * as R from "./render.js";
 import {
   state, joueurActif, plateauDe, ajouterObjet, soigner, blesser,
-  sauvegarder,
+  meilleureArme, sauvegarder,
 } from "./state.js";
 
 let occupe = false; // empêche de relancer le dé pendant une action
@@ -30,6 +31,7 @@ function demander({ titre, html = "", img = null, boutons }) {
 //  LANCER LE DÉ ET JOUER LE TOUR
 // =============================================================================
 export async function jouerTour() {
+  if (state.boss && state.boss.actif) return attaquerBoss(); // mode combat de boss
   if (occupe || state.fini) return;
   occupe = true;
   const btn = document.querySelector("#btn-de");
@@ -126,6 +128,9 @@ async function resoudreCase(joueur) {
       break;
     case "compagnon":
       await ramasserCompagnon(joueur, c);
+      break;
+    case "bebe_dragon":
+      await ramasserBebeDragon(joueur, c);
       break;
     case "speciale":
       await caseSpeciale(joueur, c);
@@ -426,6 +431,108 @@ async function victoire(joueur) {
 }
 
 // =============================================================================
+//  LE BOSS FINAL : L'ENDER DRAGON (combat coopératif aux dés)
+// =============================================================================
+// Tous les joueurs (non gagnants) sont-ils dans l'End en même temps ?
+function tousDansEnd() {
+  const enJeu = state.joueurs.filter((j) => !j.aGagne);
+  return enJeu.length > 0 && enJeu.every((j) => j.monde === "end");
+}
+
+async function declencherBoss() {
+  const nb = state.joueurs.filter((j) => !j.aGagne).length;
+  let hp = BOSS_END.pvParJoueur * nb;
+  if (state.bebeDragon) hp = Math.ceil(hp / 2);
+  state.boss = { actif: true, hp, hpMax: hp, frame: 0 };
+  R.rendreJeu();
+  await demander({
+    titre: "🐉 L'Ender Dragon&nbsp;!", img: BOSS_END.images[0],
+    html: `<p>Vous voilà tous réunis dans l'End... l'<b>Ender Dragon</b> surgit avec
+             <b>${hp} PV</b>&nbsp;!</p>
+           <p style="font-size:14px">Chacun son tour, lancez le dé pour l'attaquer&nbsp;:
+             <b>dégâts = attaque de ton arme × dé</b>. Battez-le ensemble&nbsp;!</p>
+           ${state.bebeDragon ? '<p class="gain">🐉 Le bébé dragon l\'a déjà affaibli (PV ÷ 2)&nbsp;!</p>' : ""}`,
+    boutons: [{ texte: "Combattre&nbsp;! 🗡️", valeur: "ok" }],
+  });
+}
+
+async function attaquerBoss() {
+  if (occupe || state.fini) return;
+  occupe = true;
+  const btn = document.querySelector("#btn-de");
+  btn.disabled = true;
+
+  const joueur = joueurActif();
+  for (let i = 0; i < 6; i++) { R.afficherDe(alea(1, 6)); await pause(70); }
+  const de = alea(1, 6);
+  R.afficherDe(de);
+  await pause(300);
+
+  const arme = meilleureArme(joueur);
+  let attaque = arme ? arme.attaque : 0;
+  if (joueur.denis) attaque += COMPAGNONS.denis.bonusAttaque;
+  attaque = Math.max(BOSS_END.attaqueMini, attaque);
+  const degats = attaque * de;
+  state.boss.hp = Math.max(0, state.boss.hp - degats);
+  state.boss.frame = state.boss.frame ? 0 : 1; // petite animation du dragon
+  R.rendreJeu();
+
+  await demander({
+    titre: "🗡️ Attaque&nbsp;!", img: BOSS_END.images[state.boss.frame],
+    html: `<p class="gain">${joueur.pion.nom} inflige <b>${degats}</b> dégâts&nbsp;!
+             <span style="font-size:13px;opacity:.85">(${attaque} × 🎲${de})</span></p>
+           <p>Dragon&nbsp;: <b>${state.boss.hp} / ${state.boss.hpMax} PV</b></p>`,
+    boutons: [{ texte: "Continuer", valeur: "ok" }],
+  });
+
+  if (state.boss.hp <= 0) {
+    await victoireBoss();
+  } else {
+    // joueur suivant (on saute les éventuels gagnants)
+    let prochain = state.jTour;
+    do { prochain = (prochain + 1) % state.joueurs.length; }
+    while (state.joueurs[prochain].aGagne && prochain !== state.jTour);
+    state.jTour = prochain;
+    R.rendreJeu();
+    sauvegarder();
+  }
+  occupe = false;
+  if (!state.fini) btn.disabled = false;
+}
+
+async function victoireBoss() {
+  state.joueurs.forEach((j) => { j.aGagne = true; });
+  state.fini = true;
+  sauvegarder();
+  await demander({
+    titre: "🏆 Ender Dragon vaincu&nbsp;!", img: BOSS_END.images[0],
+    html: `<p class="gain">Ensemble, vous avez terrassé l'Ender Dragon&nbsp;!
+             <br>Victoire coopérative — <b>tout le monde gagne</b>&nbsp;! 🎉</p>`,
+    boutons: [{ texte: "Rejouer", valeur: "rejouer", classe: "btn-principal" }],
+  });
+  window.dispatchEvent(new CustomEvent("rejouer"));
+}
+
+// Case bébé dragon (End) : divise par 2 les PV du boss (ou de son futur combat)
+async function ramasserBebeDragon(joueur, c) {
+  c.type = "vide"; // consommé
+  R.rafraichirCase(joueur.position);
+  if (state.boss && state.boss.actif) {
+    state.boss.hp = Math.ceil(state.boss.hp / 2);
+    state.boss.hpMax = Math.ceil(state.boss.hpMax / 2);
+    R.rendreJeu();
+  } else {
+    state.bebeDragon = true;
+  }
+  await demander({
+    titre: "🐉 Bébé Dragon&nbsp;!", img: BEBE_DRAGON.img,
+    html: `<p class="gain">Le bébé dragon est de votre côté&nbsp;: les PV de l'Ender Dragon
+             sont <b>divisés par 2</b>&nbsp;!</p>`,
+    boutons: [{ texte: "Génial&nbsp;! ", valeur: "ok" }],
+  });
+}
+
+// =============================================================================
 //  FIN DE TOUR : joueur suivant + mécaniques (ennemis, fantômes)
 // =============================================================================
 async function finDeTour() {
@@ -442,6 +549,12 @@ async function finDeTour() {
   if (nouveauTourComplet) {
     state.tour++;
     mecaniquesDeFinDeTour();
+  }
+
+  // Tous réunis dans l'End ? -> le boss final apparaît
+  if (!state.boss && tousDansEnd()) {
+    await declencherBoss();
+    return;
   }
 
   R.rendreJeu();

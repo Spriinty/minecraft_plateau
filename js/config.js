@@ -82,6 +82,21 @@ export const FANTOME = {
   id: "fantome", nom: "Fantôme", force: 3, img: "enemy/overworld/enemy_fantome.png",
 };
 
+// LE BOSS FINAL : l'Ender Dragon. Il apparaît quand TOUS les joueurs sont dans
+// l'End en même temps. Combat aux dés (coopératif) : chaque joueur, à son tour,
+// inflige (attaque de son arme) × (dé) dégâts. S'il tombe, tout le monde gagne.
+export const BOSS_END = {
+  nom: "Ender Dragon",
+  pvParJoueur: 27,        // PV du dragon = 27 × nombre de joueurs (≈ 3 tours chacun)
+  attaqueMini: 1,         // dégâts minimum même sans arme (coups de poing)
+  images: ["enemy/end/ender_dragon_1.png", "enemy/end/ender_dragon_2.png"],
+};
+
+// Le bébé dragon (dans l'End) : si on tombe sur sa case, les PV du boss ÷ 2.
+export const BEBE_DRAGON = {
+  id: "bebe_dragon", nom: "Bébé Dragon", img: "helper/baby_dragon.png", diviseurPV: 2,
+};
+
 // -----------------------------------------------------------------------------
 //  LES ARMES (dossier stuff/) — "attaque" en cœurs.
 //  Épée & hache = combat. Pioche & pelle = outils (attaque plus faible mais
@@ -288,6 +303,7 @@ export const PLATEAUX = {
     cases: 24, de: 6, cols: 8,
     densiteEnnemi: 0.45, densiteCoffre: 0.15, densiteNourriture: 0.05,
     nbCompagnons: 1,
+    nbBebeDragon: 1, // case qui divise par 2 les PV du boss
     casesSpeciales: [
       { type: "faille", nb: 2 },
       { type: "sable_ames", nb: 1 },

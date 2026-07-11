@@ -2,7 +2,7 @@
 //  BOARD.JS — Génère les plateaux (liste de cases) selon la config.
 //  Chaque case = { index, type, ...données selon le type }
 // =============================================================================
-import { ENNEMIS, COFFRES, NOURRITURE, COMPAGNONS, CASES_SPECIALES, PLATEAUX, RULES } from "./config.js";
+import { ENNEMIS, COFFRES, NOURRITURE, COMPAGNONS, CASES_SPECIALES, BEBE_DRAGON, PLATEAUX, RULES } from "./config.js";
 import { alea, auHasard, chance } from "./utils.js";
 
 // Types de cases :
@@ -148,6 +148,17 @@ export function genererPlateau(monde) {
       cases[i].texture = tex && tex.length ? auHasard(tex) : null;
       mis++;
     }
+  }
+
+  // 7) Case "bébé dragon" (End uniquement) : divise les PV du boss par 2
+  const nbBebe = cfg.nbBebeDragon || 0;
+  let bebes = 0, essaisBebe = 0;
+  while (bebes < nbBebe && essaisBebe < 300) {
+    essaisBebe++;
+    const i = alea(zone + 1, n - 2);
+    if (cases[i].type !== "vide") continue;
+    cases[i].type = "bebe_dragon";
+    bebes++;
   }
 
   return { monde, cfg, cases };

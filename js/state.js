@@ -14,6 +14,8 @@ export const state = {
   tour: 1,       // numéro de tour (augmente quand tout le monde a joué)
   plateaux: {},  // { overworld:{...}, nether:{...}, end:{...} }
   fantomes: [],  // [{ monde, position }]
+  boss: null,    // combat de l'Ender Dragon : { actif, hp, hpMax, frame }
+  bebeDragon: false, // vrai si un joueur a trouvé le bébé dragon (PV du boss ÷2)
   fini: false,
 };
 
@@ -46,6 +48,8 @@ export function nouvellePartie(pionIds) {
   state.tour = 1;
   state.fini = false;
   state.fantomes = [];
+  state.boss = null;
+  state.bebeDragon = false;
   state.plateaux = {
     overworld: genererPlateau("overworld"),
     nether: genererPlateau("nether"),
@@ -126,7 +130,8 @@ export function sauvegarder() {
   try {
     localStorage.setItem(CLE_SAUVEGARDE, JSON.stringify({
       joueurs: state.joueurs, jTour: state.jTour, tour: state.tour,
-      plateaux: state.plateaux, fantomes: state.fantomes, fini: state.fini,
+      plateaux: state.plateaux, fantomes: state.fantomes,
+      boss: state.boss, bebeDragon: state.bebeDragon, fini: state.fini,
     }));
   } catch (e) { /* pas grave si la sauvegarde échoue */ }
 }

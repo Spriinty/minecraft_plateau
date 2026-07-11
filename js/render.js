@@ -1,7 +1,7 @@
 // =============================================================================
 //  RENDER.JS — Tout l'affichage (DOM). Lit l'état, ne le modifie pas.
 // =============================================================================
-import { ASSETS, PLATEAUX, COFFRES, NOURRITURE, ENNEMIS, FANTOME, COMPAGNONS, CASES_SPECIALES } from "./config.js";
+import { ASSETS, PLATEAUX, COFFRES, NOURRITURE, ENNEMIS, FANTOME, COMPAGNONS, CASES_SPECIALES, BOSS_END, BEBE_DRAGON } from "./config.js";
 import { positionSerpentin } from "./board.js";
 import { state, joueurActif, meilleureArme, meilleureArmure } from "./state.js";
 
@@ -33,6 +33,7 @@ function libelleContenu(c) {
       const comp = COMPAGNONS[c.compagnon];
       return { src: comp.img, badge: "🤝" };
     }
+    case "bebe_dragon": return { textureSprite: BEBE_DRAGON.img, badge: "PV÷2" };
     case "speciale": {
       const s = CASES_SPECIALES[c.special];
       const signe = s.effet === "avance" ? "+" : (s.effet === "degats" ? "" : "−");
@@ -273,11 +274,50 @@ export function rendreHud() {
 // L'animation de déplacement du pion, elle, passe par placerPions() (pas ici).
 export function rendreJeu() {
   const j = joueurActif();
+  if (state.boss && state.boss.actif) {
+    rendreHud();
+    rendreBoss();
+    majBoutonDe();
+    return;
+  }
   const plateau = state.plateaux[j.monde];
   construirePlateau(plateau);
   rendreHud();
   placerPions();
   placerFantomes();
+  majBoutonDe();
+}
+
+// Libellé du bouton d'action (dé normal vs attaque du boss)
+function majBoutonDe() {
+  const btn = $("#btn-de");
+  if (btn) btn.innerHTML = (state.boss && state.boss.actif) ? "🗡️ Attaquer" : "🎲 Lancer le dé";
+}
+
+// Vue du combat de boss : le dragon + sa barre de PV (remplace le plateau)
+function rendreBoss() {
+  const zone = $("#zone-plateau");
+  const b = state.boss;
+  if (zone) {
+    zone.className = "deco-end";
+    zone.style.backgroundImage =
+      `linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)), url("${img("texture/ender/background_end.png")}")`;
+    zone.style.backgroundSize = "cover";
+    zone.style.backgroundPosition = "center";
+  }
+  const plateauEl = $("#plateau");
+  plateauEl.className = "boss-mode";
+  plateauEl.style.gridTemplateColumns = "";
+  const pct = Math.max(0, Math.round((b.hp / b.hpMax) * 100));
+  plateauEl.innerHTML = `
+    <div class="boss">
+      <img class="boss-img" src="${img(BOSS_END.images[b.frame || 0])}" alt="Ender Dragon">
+      <div class="boss-nom">🐉 ${BOSS_END.nom}</div>
+      <div class="boss-barre"><div class="boss-vie" style="width:${pct}%"></div></div>
+      <div class="boss-pv">${b.hp} / ${b.hpMax} PV</div>
+    </div>`;
+  const ml = $("#monde-label");
+  if (ml) ml.textContent = "Combat final";
 }
 
 // Recalcule la taille des cases et repositionne (rotation / redimensionnement),
