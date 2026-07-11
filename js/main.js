@@ -11,7 +11,10 @@ import * as R from "./render.js";
 
 function allerAccueil() {
   state.ecran = "accueil";
-  state.fini = false;
+  // NE PAS remettre state.fini à false ici : le tour de jeu en cours peut être
+  // en train de se terminer (pile d'appels finDeTour). Si on remet fini=false,
+  // finDeTour reprend et peut afficher un événement (ex: boss) par-dessus
+  // l'accueil. C'est nouvellePartie() qui remet fini=false au vrai démarrage.
   selectionParDefaut();
   construireAccueil();
   $("#btn-reprendre").hidden = !ilYAUneSauvegarde();
